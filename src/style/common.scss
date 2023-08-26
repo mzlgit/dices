@@ -1,0 +1,13 @@
+// 公共样式
+div {
+  box-sizing: border-box;
+}
+
+* {
+  user-select: none;
+}
+#app {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
