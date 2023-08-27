@@ -1,9 +1,13 @@
 <template>
   <div class="index-page">
     <div class="content">
-      <canvas id="renderCanvas"></canvas>
+      <canvas id="renderCanvas" :class="[canvasClassNames]"></canvas>
     </div>
-    <button @click="start">start</button>
+    <div class="btn-list">
+      <button class="btn animate__animated animate__bounce" @click="upGaper">打开</button>
+      <button class="btn animate__animated animate__bounce" @click="start">摇一摇</button>
+      <button class="btn animate__animated animate__bounce" @click="downGaper">关闭</button>
+    </div>
   </div>
 </template>
 
@@ -24,9 +28,16 @@ export default {
       sleepObj: {},
       runTimer2: null,
       startStatus: false,
+      upStatus: false,
+      downStatus: false,
+      extrusion: null,
+      animation1: null,
+      animation2: null,
+      music: null,
+      canvasClassNames: "animate__animated animate__zoomInDown"
     };
   },
-  created() {},
+  created() { },
   mounted() {
     try {
       this.init();
@@ -35,6 +46,44 @@ export default {
     }
   },
   methods: {
+    upGaper() {
+      this.upStatus = true;
+      if (!this.engine._renderingQueueLaunched) {
+        this.engine.runRenderLoop(() => {
+          this.scene.render();
+          if (this.extrusion.position.y == 20) {
+            this.upStatus = false;
+            this.engine.stopRenderLoop();
+          }
+        });
+      } else {
+        if (!this.startStatus && this.extrusion.position.y == 20) {
+          this.upStatus = false;
+          this.engine.stopRenderLoop();
+        }
+      }
+      this.extrusion.position.y == 20 ? "" :
+        this.animation2.start();
+    },
+    downGaper() {
+      this.downStatus = true;
+      if (!this.engine._renderingQueueLaunched) {
+        this.engine.runRenderLoop(() => {
+          this.scene.render();
+          if (this.extrusion.position.y == 0) {
+            this.downStatus = false;
+            this.engine.stopRenderLoop();
+          }
+        });
+      } else {
+        if (!this.startStatus && this.extrusion.position.y == 0) {
+          this.downStatus = false;
+          this.engine.stopRenderLoop();
+        }
+      }
+      this.extrusion.position.y == 0 ? "" :
+        this.animation1.start();
+    },
     start() {
       if (this.startStatus) {
         return
@@ -43,11 +92,14 @@ export default {
           this.scene.render();
         });
       }
+      this.music.play();
       this.startStatus = true;
       this.sleepObj = {};
       let num = 0;
+      this.extrusion.position.y == 0 ? "" :
+        this.animation1.start();
       this.runTimer2 = setInterval(() => {
-        num += 100;
+        num += 110;
         this.scene.meshes.forEach((item) => {
           if (item.name.indexOf("box") !== -1) {
             item.physicsBody.applyForce(
@@ -56,7 +108,7 @@ export default {
             );
           }
         });
-        if (num == 1000) {
+        if (num >= 1000) {
           clearInterval(this.runTimer2);
           let timer = setInterval(() => {
             this.scene.meshes.forEach((item) => {
@@ -67,7 +119,6 @@ export default {
                     this.positionObj[item.name]._y === item.position.y &&
                     this.positionObj[item.name]._z === item.position.z
                   ) {
-                    console.log("stop");
                     this.sleepObj[item.name] = true;
                   } else {
                     let position = JSON.parse(JSON.stringify(item.position));
@@ -80,11 +131,13 @@ export default {
                 if (Object.keys(this.sleepObj).length == 5) {
                   clearInterval(timer);
                   this.startStatus = false;
-                  this.engine.stopRenderLoop();
+                  // this.animation1.stop()
+                  if (!this.upStatus && !this.downStatus) {
+                    this.engine.stopRenderLoop();
+                  }
                 }
               }
             });
-            // this.engine.stopRenderLoop();
           }, 100);
         }
       }, 100);
@@ -102,13 +155,16 @@ export default {
       // this.engine.setHardwareScalingLevel(0.1);
       // CreateScene function that creates and return the scene
       this.createScene();
+
     },
     async createScene() {
       // Create a basic BJS Scene object
       this.scene = new BABYLON.Scene(this.engine);
+      this.scene.clearColor = new BABYLON.Color3(34 / 255, 25 / 255, 77 / 255)
+      // this.scene.clearColor = BABYLON.Color3(34, 25, 77);
       // scene.useRightHandedSystem = true;
-      // var gravityVector = new BABYLON.Vector3(0, -9.81, 0);
-      // var physicsPlugin = new BABYLON.CannonJSPlugin();
+      // let gravityVector = new BABYLON.Vector3(0, -9.81, 0);
+      // let physicsPlugin = new BABYLON.CannonJSPlugin();
       // scene.enablePhysics(gravityVector, physicsPlugin);
       // scene.enablePhysics();
       const havokInstance = await HavokPhysics();
@@ -117,16 +173,16 @@ export default {
       // enable physics in the scene with a gravity
       this.scene.enablePhysics(new BABYLON.Vector3(0, -9.8, 0), hk);
       // Create a FreeCamera, and set its position to {x: 0, y: 5, z: -10}
-      // var camera = new BABYLON.FreeCamera(
+      // let camera = new BABYLON.FreeCamera(
       //   "camera1",
       //   new BABYLON.Vector3(0, 5, -10),
       //   scene
       // );
-      var camera = new BABYLON.ArcRotateCamera(
+      let camera = new BABYLON.ArcRotateCamera(
         "Camera",
         (4 * Math.PI) / 2,
         Math.PI / 4.8,
-        26,
+        30,
         BABYLON.Vector3(0, 0, 0),
         this.scene
       );
@@ -134,13 +190,14 @@ export default {
       // Target the camera to scene origin
       camera.setTarget(BABYLON.Vector3.Zero());
       // Attach the camera to the canvas
-      camera.attachControl(this.canvas, false);
+      // camera.attachControl(this.canvas, false);
       // Create a basic light, aiming 0, 1, 0 - meaning, to the sky
-      var light = new BABYLON.HemisphericLight(
+      let light = new BABYLON.HemisphericLight(
         "light1",
         new BABYLON.Vector3(0, 1, 0),
         this.scene
       );
+      // light.specular = BABYLON.Color3.White();
       let r = 4;
       const myShape = [new BABYLON.Vector3(0, r, 0)];
       for (let index = 1; index < r; index += 0.1) {
@@ -198,40 +255,63 @@ export default {
         // scale: 0.5,
         sideOrientation: BABYLON.Mesh.DOUBLESIDE,
       });
-      var mat = new BABYLON.StandardMaterial("mat", this.scene);
+      let mat = new BABYLON.StandardMaterial("mat", this.scene);
 
       // mat.diffuseTexture = new BABYLON.Texture(
       //   require("../images/1.webp"),
       //   scene
       // );
       // mat.diffuseTexture.hasAlpha = true;
-      mat.transparencyMode = BABYLON.Material.MATERIAL_ALPHATESTANDBLEND;
+      // mat.transparencyMode = BABYLON.Material.MATERIAL_ALPHATESTANDBLEND;
       mat.useAlphaFromDiffuseTexture = true;
       mat.diffuseColor = new BABYLON.Color3(1, 1, 1);
-      mat.alpha = 0.01;
+      mat.alpha = 0;
+      // mat.backFaceCulling = false;
+      // mat.disableLighting = true;
       extrusion.material = mat;
       extrusion.position.y = 0;
+      extrusion.actionManager = new BABYLON.ActionManager(this.scene);
+      extrusion.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (event) => {
+        console.log(extrusion.position, event);
+      }));
+      let highY = 20, times = 10;
+      let extrusion2 = extrusion.clone();
+      extrusion2.material = mat.clone();
+      extrusion2.scaling = new BABYLON.Vector3(1.12, 1.12, 1.12);
+      extrusion2.material.alpha = 1;
+      extrusion2.position.y = highY;
+      this.extrusion = extrusion2;
 
-      // let wall = BABYLON.MeshBuilder.ExtrudeShape("wall", {
-      //   shape: myShape,
-      //   path: myPath,
-      //   closeShape: true,
-      //   closePath: false,
-      //   // scale: 0.5,
-      //   sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-      // });
-      // let extrusionPhysics = new BABYLON.PhysicsImpostor(
-      //   extrusion,
-      //   BABYLON.PhysicsImpostor.MeshImpostor,
-      //   { mass: 0, restitution: 0.75 },
-      //   scene
-      // );
+      //Create a scaling animation
+      let animation = new BABYLON.Animation("ySlide", "position.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+      let animation2 = new BABYLON.Animation("ySlide", "position.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+      // Animation keys
+      let keys = [], keys2 = [];
+      //At the animation key 0, the value of scaling is "1"
+      for (let index = 0; index <= times; index++) {
+        keys.push({
+          frame: index,
+          value: highY - index * (highY / times)
+        });
+        keys2.push({
+          frame: index,
+          value: index * (highY / times)
+        })
+      }
+      //Adding keys to the animation object
+      animation.setKeys(keys);
+      animation2.setKeys(keys2);
+      this.animation1 = new BABYLON.AnimationGroup("my group");
+      this.animation2 = new BABYLON.AnimationGroup("my group 2");
+      this.animation1.addTargetedAnimation(animation, extrusion2);
+      this.animation2.addTargetedAnimation(animation2, extrusion2);
+
       const mat2 = new BABYLON.StandardMaterial("mat2");
-      const texture = new BABYLON.Texture(require("../images/dices.png"));
+      const texture = new BABYLON.Texture(new URL('../image/dices.png', import.meta.url).href);
       mat2.diffuseTexture = texture;
 
-      var columns = 6;
-      var rows = 1;
+      let columns = 6;
+      let rows = 1;
 
       const faceUV = new Array(6);
 
@@ -253,17 +333,16 @@ export default {
 
       const sphere = BABYLON.MeshBuilder.CreateBox("box", options);
       sphere.material = mat2;
-      // var sphere = BABYLON.MeshBuilder.CreateBox(
+      // let sphere = BABYLON.MeshBuilder.CreateBox(
       //   "box",
       //   { size: 1, segments: 32 },
       //   this.scene
       // );
 
       // Move the sphere upward at 4 units
-      sphere.position.y = 4;
 
       // Our built-in 'ground' shape.
-      var ground = BABYLON.MeshBuilder.CreateCylinder(
+      let ground = BABYLON.MeshBuilder.CreateCylinder(
         "ground",
         {
           width: 30,
@@ -284,7 +363,7 @@ export default {
       new BABYLON.PhysicsAggregate(
         sphere,
         BABYLON.PhysicsShapeType.BOX,
-        { mass: 1, restitution: 0.75 },
+        { mass: 5, restitution: 0.75 },
         this.scene
       );
       new BABYLON.PhysicsAggregate(
@@ -302,18 +381,21 @@ export default {
         this.scene
       );
 
-      var sphere2 = sphere.clone();
-      var sphere3 = sphere.clone();
-      var sphere4 = sphere.clone();
-      var sphere5 = sphere.clone();
-      sphere2.name = "box2";
-      sphere3.name = "box3";
-      sphere4.name = "box4";
-      sphere5.name = "box5";
-      sphere2.position.y = 2;
-      sphere2.position.x = 0.5;
+      let sphere2 = sphere.clone("box2");
+      let sphere3 = sphere.clone("box3");
+      let sphere4 = sphere.clone("box4");
+      let sphere5 = sphere.clone("box5");
+      sphere.position.y = 4;
+      sphere2.position.y = 6;
+      sphere3.position.y = 8;
+      sphere4.position.y = 10;
+      sphere5.position.y = 12;
       // return scene;
       // this.createScene().then((scene) => {
+      this.music = new BABYLON.Sound("Violons", new URL('../audio/1.mp3', import.meta.url).href, this.scene, null, {
+        loop: false
+      });
+
       console.log(this.scene);
       this.engine.runRenderLoop(() => {
         if (this.scene) {
@@ -334,20 +416,33 @@ export default {
 .index-page {
   padding: 0 !important;
   height: calc(100%);
-  background: hsl(250, 50%, 20%);
+  background: rgb(34, 25, 77);
+
   .content {
     width: 100%;
     height: 100%;
+
     // padding: 10% auto 0;
     canvas {
       width: 100%;
       height: 100%;
     }
   }
-  button {
+
+  .btn-list {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    bottom: 10vh;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 80vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    button {
+      display: inline-block;
+      width: 25vw;
+    }
   }
 }
 </style>

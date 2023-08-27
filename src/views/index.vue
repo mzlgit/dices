@@ -2,19 +2,14 @@
   <div class="index">
     <div class="nav" v-show="route.name == 'home'">
       <div class="game-item-list">
-        <div
-        class="game-item"
-        v-for="(item, idx) in list"
-        :key="idx"
-        @click="go(item)"
-        >
-        <img :src="item.img" />
-        <p>{{ item.name }}</p>
+        <div class="game-item" v-for="(item, idx) in list" :key="idx" @click="go(item)">
+          <img :src="item.img" />
+          <p>{{ item.name }}</p>
+        </div>
       </div>
+      <h3>Happy Hour</h3>
     </div>
-    <h3>Happy Hour</h3>
-  </div>
-  <div class="bg-wrap"></div>
+    <div class="bg-wrap"></div>
   </div>
 </template>
 <script setup>
@@ -22,15 +17,15 @@ import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const route = useRoute();
 const list = [
-  {
-    name: "zdog",
-    path: "zdog",
-    img: require("../image/d1.jpg"),
-  },
+  // {
+  //   name: "zdog",
+  //   path: "zdog",
+  //   img: new URL('../image/d1.jpg', import.meta.url).href,
+  // },
   {
     name: "babylon",
     path: "babylon",
-    img: require("../image/d2.jpg"),
+    img: new URL('../image/d2.jpg', import.meta.url).href,
   },
 ];
 const go = (item) => {
@@ -42,6 +37,7 @@ const go = (item) => {
 .index {
   width: 100%;
   height: 100%;
+
   .bg-wrap {
     width: 100vw;
     height: 100vh;
@@ -52,6 +48,7 @@ const go = (item) => {
     position: absolute;
     z-index: -1;
   }
+
   .nav {
     position: absolute;
     top: 45%;
@@ -60,6 +57,7 @@ const go = (item) => {
     z-index: 99;
     color: #fff;
     width: 100%;
+
     h3 {
       margin-top: 12vh;
       height: 40px;
@@ -69,20 +67,24 @@ const go = (item) => {
       font-style: italic;
       // text-shadow: 1px -1px #fff;
     }
+
     .game-item-list {
       display: flex;
       justify-content: center;
       align-items: center;
+
       .game-item {
         width: 44%;
         display: flex;
         justify-content: center;
         align-items: center;
         flex-direction: column;
+
         img {
           width: 66%;
           border-radius: 50%;
         }
+
         p {
           margin-top: 6px;
           font-size: 16px;

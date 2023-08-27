@@ -3,15 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@babylonjs/havok": "^1.1.4",
+    "animate.css": "^4.1.1",
     "babylonjs": "^6.18.0",
     "babylonjs-loaders": "^6.18.0",
     "pinia": "^2.1.6",
+    "sass": "^1.66.1",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4",
     "zdog": "^1.1.3"
