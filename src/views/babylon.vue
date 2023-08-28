@@ -1,13 +1,20 @@
 <template>
   <div class="index-page">
     <div class="content">
-      <canvas id="renderCanvas" :class="[canvasClassNames]"></canvas>
+      <canvas id="renderCanvas" class="animate__animated animate__zoomInDown"></canvas>
     </div>
     <div class="btn-list">
-      <button class="btn animate__animated animate__bounce" @click="upGaper">打开</button>
-      <button class="btn animate__animated animate__bounce" @click="start">摇一摇</button>
-      <button class="btn animate__animated animate__bounce" @click="downGaper">关闭</button>
+      <button class="btn animate__animated animate__bounce" @click="upGaper">
+        打开
+      </button>
+      <button class="btn animate__animated animate__bounce" @click="start">
+        摇一摇
+      </button>
+      <button class="btn animate__animated animate__bounce" @click="downGaper">
+        关闭
+      </button>
     </div>
+    <div class="back" @click="gaBack"></div>
   </div>
 </template>
 
@@ -34,10 +41,9 @@ export default {
       animation1: null,
       animation2: null,
       music: null,
-      canvasClassNames: "animate__animated animate__zoomInDown"
     };
   },
-  created() { },
+  created() {},
   mounted() {
     try {
       this.init();
@@ -46,6 +52,9 @@ export default {
     }
   },
   methods: {
+    gaBack() {
+      this.$router.go(-1);
+    },
     upGaper() {
       this.upStatus = true;
       if (!this.engine._renderingQueueLaunched) {
@@ -62,8 +71,7 @@ export default {
           this.engine.stopRenderLoop();
         }
       }
-      this.extrusion.position.y == 20 ? "" :
-        this.animation2.start();
+      this.extrusion.position.y == 20 ? "" : this.animation2.start();
     },
     downGaper() {
       this.downStatus = true;
@@ -81,12 +89,11 @@ export default {
           this.engine.stopRenderLoop();
         }
       }
-      this.extrusion.position.y == 0 ? "" :
-        this.animation1.start();
+      this.extrusion.position.y == 0 ? "" : this.animation1.start();
     },
     start() {
       if (this.startStatus) {
-        return
+        return;
       } else {
         this.engine.runRenderLoop(() => {
           this.scene.render();
@@ -96,8 +103,7 @@ export default {
       this.startStatus = true;
       this.sleepObj = {};
       let num = 0;
-      this.extrusion.position.y == 0 ? "" :
-        this.animation1.start();
+      this.extrusion.position.y == 0 ? "" : this.animation1.start();
       this.runTimer2 = setInterval(() => {
         num += 110;
         this.scene.meshes.forEach((item) => {
@@ -155,12 +161,11 @@ export default {
       // this.engine.setHardwareScalingLevel(0.1);
       // CreateScene function that creates and return the scene
       this.createScene();
-
     },
     async createScene() {
       // Create a basic BJS Scene object
       this.scene = new BABYLON.Scene(this.engine);
-      this.scene.clearColor = new BABYLON.Color3(34 / 255, 25 / 255, 77 / 255)
+      this.scene.clearColor = new BABYLON.Color3(34 / 255, 25 / 255, 77 / 255);
       // this.scene.clearColor = BABYLON.Color3(34, 25, 77);
       // scene.useRightHandedSystem = true;
       // let gravityVector = new BABYLON.Vector3(0, -9.81, 0);
@@ -271,10 +276,16 @@ export default {
       extrusion.material = mat;
       extrusion.position.y = 0;
       extrusion.actionManager = new BABYLON.ActionManager(this.scene);
-      extrusion.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, (event) => {
-        console.log(extrusion.position, event);
-      }));
-      let highY = 20, times = 10;
+      extrusion.actionManager.registerAction(
+        new BABYLON.ExecuteCodeAction(
+          BABYLON.ActionManager.OnPickUpTrigger,
+          (event) => {
+            console.log(extrusion.position, event);
+          }
+        )
+      );
+      let highY = 20,
+        times = 10;
       let extrusion2 = extrusion.clone();
       extrusion2.material = mat.clone();
       extrusion2.scaling = new BABYLON.Vector3(1.12, 1.12, 1.12);
@@ -283,20 +294,33 @@ export default {
       this.extrusion = extrusion2;
 
       //Create a scaling animation
-      let animation = new BABYLON.Animation("ySlide", "position.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-      let animation2 = new BABYLON.Animation("ySlide", "position.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+      let animation = new BABYLON.Animation(
+        "ySlide",
+        "position.y",
+        30,
+        BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+      );
+      let animation2 = new BABYLON.Animation(
+        "ySlide",
+        "position.y",
+        30,
+        BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+      );
       // Animation keys
-      let keys = [], keys2 = [];
+      let keys = [],
+        keys2 = [];
       //At the animation key 0, the value of scaling is "1"
       for (let index = 0; index <= times; index++) {
         keys.push({
           frame: index,
-          value: highY - index * (highY / times)
+          value: highY - index * (highY / times),
         });
         keys2.push({
           frame: index,
-          value: index * (highY / times)
-        })
+          value: index * (highY / times),
+        });
       }
       //Adding keys to the animation object
       animation.setKeys(keys);
@@ -307,7 +331,9 @@ export default {
       this.animation2.addTargetedAnimation(animation2, extrusion2);
 
       const mat2 = new BABYLON.StandardMaterial("mat2");
-      const texture = new BABYLON.Texture(new URL('../image/dices.png', import.meta.url).href);
+      const texture = new BABYLON.Texture(
+        new URL("../image/dices.png", import.meta.url).href
+      );
       mat2.diffuseTexture = texture;
 
       let columns = 6;
@@ -392,9 +418,15 @@ export default {
       sphere5.position.y = 12;
       // return scene;
       // this.createScene().then((scene) => {
-      this.music = new BABYLON.Sound("Violons", new URL('../audio/1.mp3', import.meta.url).href, this.scene, null, {
-        loop: false
-      });
+      this.music = new BABYLON.Sound(
+        "Violons",
+        new URL("../audio/1.mp3", import.meta.url).href,
+        this.scene,
+        null,
+        {
+          loop: false,
+        }
+      );
 
       console.log(this.scene);
       this.engine.runRenderLoop(() => {
@@ -414,9 +446,10 @@ export default {
 
 <style lang="scss" scoped>
 .index-page {
-  padding: 0 !important;
-  height: calc(100%);
+  width: 100%;
+  height: 100%;
   background: rgb(34, 25, 77);
+  overflow: hidden;
 
   .content {
     width: 100%;

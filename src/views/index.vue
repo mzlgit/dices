@@ -1,8 +1,13 @@
 <template>
   <div class="index">
-    <div class="nav" v-show="route.name == 'home'">
+    <div class="nav">
       <div class="game-item-list">
-        <div class="game-item" v-for="(item, idx) in list" :key="idx" @click="go(item)">
+        <div
+          class="game-item"
+          v-for="(item, idx) in list"
+          :key="idx"
+          @click="go(item)"
+        >
           <img :src="item.img" />
           <p>{{ item.name }}</p>
         </div>
@@ -12,24 +17,33 @@
     <div class="bg-wrap"></div>
   </div>
 </template>
-<script setup>
-import { useRouter, useRoute } from "vue-router";
-const router = useRouter();
-const route = useRoute();
-const list = [
-  // {
-  //   name: "zdog",
-  //   path: "zdog",
-  //   img: new URL('../image/d1.jpg', import.meta.url).href,
-  // },
-  {
-    name: "babylon",
-    path: "babylon",
-    img: new URL('../image/d2.jpg', import.meta.url).href,
+<script>
+export default {
+  name: "index-page",
+  components: {},
+  data() {
+    return {
+      list: [
+        // {
+        //   name: "zdog",
+        //   path: "zdog",
+        //   img: new URL('../image/d1.jpg', import.meta.url).href,
+        // },
+        {
+          name: "babylon",
+          path: "babylon",
+          img: new URL("../image/d2.jpg", import.meta.url).href,
+        },
+      ],
+    };
   },
-];
-const go = (item) => {
-  router.push(item.path);
+  methods: {
+    go(item) {
+      this.$router.push({
+        path: item.path
+      })
+    }
+  }
 };
 </script>
 
@@ -46,7 +60,6 @@ const go = (item) => {
     background-image: url("../image/icon.jpg");
     filter: blur(10px);
     position: absolute;
-    z-index: -1;
   }
 
   .nav {
