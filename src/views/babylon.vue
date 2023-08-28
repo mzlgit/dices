@@ -436,9 +436,9 @@ export default {
       });
       // });
       // the canvas/window resize event handler
-      window.addEventListener("resize", function () {
-        this.engine.resize();
-      });
+      // window.addEventListener("resize", function () {
+      //   this.engine.resize();
+      // });
     },
   },
 };
