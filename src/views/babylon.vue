@@ -1,7 +1,10 @@
 <template>
   <div class="index-page">
     <div class="content">
-      <canvas id="renderCanvas" class="animate__animated animate__zoomInDown"></canvas>
+      <canvas
+        id="renderCanvas"
+        class="animate__animated animate__zoomInDown"
+      ></canvas>
     </div>
     <div class="btn-list">
       <button class="btn animate__animated animate__bounce" @click="upGaper">
@@ -107,7 +110,7 @@ export default {
       this.runTimer2 = setInterval(() => {
         num += 110;
         this.scene.meshes.forEach((item) => {
-          if (item.name.indexOf("box") !== -1) {
+          if (item.name.indexOf("dice") !== -1) {
             item.physicsBody.applyForce(
               new BABYLON.Vector3(100, 500, 0),
               new BABYLON.Vector3(0, 0, 0)
@@ -118,7 +121,7 @@ export default {
           clearInterval(this.runTimer2);
           let timer = setInterval(() => {
             this.scene.meshes.forEach((item) => {
-              if (item.name.indexOf("box") !== -1) {
+              if (item.name.indexOf("dice") !== -1) {
                 if (this.positionObj[item.name]) {
                   if (
                     this.positionObj[item.name]._x === item.position.x &&
@@ -183,6 +186,7 @@ export default {
       //   new BABYLON.Vector3(0, 5, -10),
       //   scene
       // );
+      this.scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.3);
       let camera = new BABYLON.ArcRotateCamera(
         "Camera",
         (4 * Math.PI) / 2,
@@ -202,6 +206,9 @@ export default {
         new BABYLON.Vector3(0, 1, 0),
         this.scene
       );
+      // light.diffuse = new BABYLON.Color3(1, 1, 1);
+      // light.specular = new BABYLON.Color3(1, 1, 1);
+      // light.groundColor = new BABYLON.Color3(0, 0, 0);
       // light.specular = BABYLON.Color3.White();
       let r = 4;
       const myShape = [new BABYLON.Vector3(0, r, 0)];
@@ -275,15 +282,15 @@ export default {
       // mat.disableLighting = true;
       extrusion.material = mat;
       extrusion.position.y = 0;
-      extrusion.actionManager = new BABYLON.ActionManager(this.scene);
-      extrusion.actionManager.registerAction(
-        new BABYLON.ExecuteCodeAction(
-          BABYLON.ActionManager.OnPickUpTrigger,
-          (event) => {
-            console.log(extrusion.position, event);
-          }
-        )
-      );
+      // extrusion.actionManager = new BABYLON.ActionManager(this.scene);
+      // extrusion.actionManager.registerAction(
+      //   new BABYLON.ExecuteCodeAction(
+      //     BABYLON.ActionManager.OnPickUpTrigger,
+      //     (event) => {
+      //       console.log(extrusion.position, event);
+      //     }
+      //   )
+      // );
       let highY = 20,
         times = 10;
       let extrusion2 = extrusion.clone();
@@ -330,35 +337,35 @@ export default {
       this.animation1.addTargetedAnimation(animation, extrusion2);
       this.animation2.addTargetedAnimation(animation2, extrusion2);
 
-      const mat2 = new BABYLON.StandardMaterial("mat2");
-      const texture = new BABYLON.Texture(
-        new URL("../image/dices.png", import.meta.url).href
-      );
-      mat2.diffuseTexture = texture;
+      // const mat2 = new BABYLON.StandardMaterial("mat2");
+      // const texture = new BABYLON.Texture(
+      //   new URL("../image/dices.png", import.meta.url).href
+      // );
+      // mat2.diffuseTexture = texture;
 
-      let columns = 6;
-      let rows = 1;
+      // let columns = 6;
+      // let rows = 1;
 
-      const faceUV = new Array(6);
+      // const faceUV = new Array(6);
 
-      for (let i = 0; i < 6; i++) {
-        faceUV[i] = new BABYLON.Vector4(
-          i / columns,
-          0,
-          (i + 1) / columns,
-          1 / rows
-        );
-      }
+      // for (let i = 0; i < 6; i++) {
+      //   faceUV[i] = new BABYLON.Vector4(
+      //     i / columns,
+      //     0,
+      //     (i + 1) / columns,
+      //     1 / rows
+      //   );
+      // }
 
-      const options = {
-        size: 1.25,
-        faceUV: faceUV,
-        wrap: true,
-        radius: 0.5,
-      };
+      // const options = {
+      //   size: 1.25,
+      //   faceUV: faceUV,
+      //   wrap: true,
+      //   radius: 0.5,
+      // };
 
-      const sphere = BABYLON.MeshBuilder.CreateBox("box", options);
-      sphere.material = mat2;
+      // const sphere = BABYLON.MeshBuilder.CreateBox("box", options);
+      // sphere.material = mat2;
       // let sphere = BABYLON.MeshBuilder.CreateBox(
       //   "box",
       //   { size: 1, segments: 32 },
@@ -366,7 +373,162 @@ export default {
       // );
 
       // Move the sphere upward at 4 units
+      let a = BABYLON.MeshBuilder.CreateSphere(
+        "sphere0",
+        {
+          segments: 16,
+          diameter: 9.2,
+        },
+        this.scene
+      );
+      let b = BABYLON.MeshBuilder.CreateBox("box0", { size: 4 }, this.scene);
 
+      a.scaling.x = 0.6;
+      a.scaling.z = 0.6;
+      a.scaling.y = 0.6;
+
+      a.visibility = 0;
+      b.visibility = 0;
+
+      let s1 = BABYLON.MeshBuilder.CreateSphere(
+        "sphere1",
+        {
+          segments: 16,
+          diameter: 0.6,
+        },
+        this.scene
+      );
+      let s11 = BABYLON.MeshBuilder.CreateSphere(
+        "sphere12",
+        {
+          segments: 16,
+          diameter: 1,
+        },
+        this.scene
+      );
+      s11.visibility = 0;
+      s1.visibility = 0;
+      s11.position.x = -2;
+
+      let s6 = new Array(6);
+
+      for (let i = 1; i <= 6; ++i) {
+        s6[i] = s1.clone();
+        s6[i].position.x = 2;
+        if (i <= 3) {
+          s6[i].position.z = -0.8;
+        } else {
+          s6[i].position.z = 0.8;
+        }
+      }
+
+      s6[1].position.y = 1.2;
+      s6[2].position.y = 0;
+      s6[3].position.y = -1.2;
+      s6[4].position.y = 1.2;
+      s6[5].position.y = 0;
+      s6[6].position.y = -1.2;
+
+      //
+      let s2 = new Array(2);
+      for (let i = 1; i <= 2; i++) {
+        s2[i] = s1.clone();
+        s2[i].position.y = -2;
+      }
+
+      s2[1].position.z = 0.8;
+      s2[1].position.x = 1.1;
+
+      s2[2].position.z = -0.8;
+      s2[2].position.x = -1.1;
+      //
+
+      let s3 = new Array(3);
+      for (let i = 1; i <= 3; i++) {
+        s3[i] = s1.clone();
+        s3[i].position.z = -2;
+      }
+
+      s3[1].position.x = 1.1;
+      s3[1].position.y = 0.9;
+
+      s3[2].position.x = 0;
+      s3[2].position.y = 0;
+
+      s3[3].position.x = -1.1;
+      s3[3].position.y = -0.9;
+
+      let s4 = new Array(4);
+
+      for (let i = 1; i <= 4; ++i) {
+        s4[i] = s1.clone();
+        s4[i].position.z = 2;
+        if (i <= 2) {
+          s4[i].position.x = -0.8;
+        } else {
+          s4[i].position.x = 0.8;
+        }
+      }
+
+      s4[1].position.y = 1.2;
+      s4[2].position.y = -1.2;
+      s4[3].position.y = 1.2;
+      s4[4].position.y = -1.2;
+
+      let s5 = new Array(5);
+      for (let i = 1; i <= 5; i++) {
+        s5[i] = s1.clone();
+        s5[i].position.y = 2;
+      }
+
+      s5[1].position.z = -0.8;
+      s5[1].position.x = -1.2;
+      s5[2].position.z = 0.8;
+      s5[2].position.x = -1.2;
+      s5[3].position.z = 0.8;
+      s5[3].position.x = 1.2;
+      s5[4].position.z = -0.8;
+      s5[4].position.x = 1.2;
+      s5[5].position.x = 0;
+
+      let arrayOfMeshes = s6;
+
+      arrayOfMeshes = arrayOfMeshes
+        .concat(s11)
+        .concat(s2)
+        .concat(s3)
+        .concat(s4)
+        .concat(s5);
+
+      let mergedMeshes = BABYLON.Mesh.MergeMeshes(arrayOfMeshes);
+
+      mergedMeshes.visibility = 0;
+
+      let aCSG = BABYLON.CSG.FromMesh(a);
+      let bCSG = BABYLON.CSG.FromMesh(b);
+      let s1CSG = BABYLON.CSG.FromMesh(mergedMeshes);
+
+      // Set up a MultiMaterial
+      let mat0 = new BABYLON.StandardMaterial("mat0", this.scene);
+      let mat3 = new BABYLON.StandardMaterial("mat3", this.scene);
+
+      //   mat0.diffuseTexture = new BABYLON.Texture('assets/images/dicematerial.png', this.scene)
+      // mat0.specularColor = new BABYLON.Color3(0, 0, 0);
+      // mat0.backFaceCulling = false;
+
+      // mat3.diffuseColor = new BABYLON.Color3.White();
+      // mat3.specularColor = new BABYLON.Color3(0, 0, 0);
+      // mat3.backFaceCulling = false;
+
+      let multiMat = new BABYLON.MultiMaterial("multiMat", this.scene);
+      multiMat.subMaterials.push(mat0, mat0, mat3);
+
+      let subCSG1 = bCSG.intersect(aCSG);
+      let subCSG2 = subCSG1.subtract(s1CSG);
+
+      let sphere = subCSG2.toMesh("dice", multiMat, this.scene, true);
+      sphere.scaling = new BABYLON.Vector3(0.375, 0.375, 0.375);
+      sphere.position.y = 0;
       // Our built-in 'ground' shape.
       let ground = BABYLON.MeshBuilder.CreateCylinder(
         "ground",
@@ -407,10 +569,10 @@ export default {
         this.scene
       );
 
-      let sphere2 = sphere.clone("box2");
-      let sphere3 = sphere.clone("box3");
-      let sphere4 = sphere.clone("box4");
-      let sphere5 = sphere.clone("box5");
+      let sphere2 = sphere.clone("dice2");
+      let sphere3 = sphere.clone("dice3");
+      let sphere4 = sphere.clone("dice4");
+      let sphere5 = sphere.clone("dice5");
       sphere.position.y = 4;
       sphere2.position.y = 6;
       sphere3.position.y = 8;
